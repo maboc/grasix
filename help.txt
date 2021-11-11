@@ -1,0 +1,46 @@
+
+attribute add base
+	Purpose : Add an attribute to a base
+	Syntax  : attribute add base <base id> <key> <value>
+		<base id> : the base to which the attribute is added
+		<key>     : The key of the attribute
+		<value>   : The value of this attribute
+
+attribute add node <base id> <node id> <key> <value>
+	Purpose : Add an attribute to a node
+	Syntax  : attribute add node <base_id> <node_id> <key> <value>
+		<base_id> : the base to which the noded belongs
+		<node_id> : the node to which the attribute is added
+		<key>     : The key of the attribute
+		<value>   : The value of this attribute
+
+attribute delete node
+       Purpose : delete a attribute belonging to a node
+       Syntax  : attribute delete node <base id> <node id> <attribute id>
+       	       <base id>      : ID of the base on which the node resides
+	       <node id>      : ID of the node the attribute to be deleted belongs
+	       <attribute id> : ID of the attribute to be deleted
+
+base display
+	purpose : fully show a base
+	Syntax  : base display <base_id>
+		<base_id> : The base which must be displayed
+	Remarks : This will generate a lot of output (all nodes/allattributes of those nodes/all relations/all attributes of those relations)
+		  So ... be carefull
+		  
+base list
+	Purpose : shows information about all bases
+	Syntax : base list
+
+base new
+     	 Purpose : Creates a new base with a first attribute <key> <value>
+	 Syntax  : base new <key> <value>
+	 	 <key>    : the key of the first attribute of the new base
+		 <values> : the value of the first attribute of the new base 
+
+node new
+	Purpose : Create a new node whitin base <base_id>, and add an attribute to the node.
+	Syntax : node new <base id> <key> <value>
+	       <base_id> : The base to which the new nodes belongs
+	       <key>     : Key of the attribute, which will be added to the new node
+	       <value>   : Value of the attribute, which will be added to the new node
