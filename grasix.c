@@ -12,7 +12,7 @@ int main(int argc, char ** argv){
   printf("Moving to the background\n");
   pid=fork();
   if (pid==0){
-    sleep(20);
+    //    sleep(20);
     printf("Welcome to your inner child\n");
     doorgaan=0;
     state=0;
