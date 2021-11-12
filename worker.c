@@ -44,7 +44,7 @@ void * worker(void * sck){
 	  b->attributes=dll_add(b->attributes, a);
 	  bases=dll_add(bases, b);
 	}
-
+	
 	//base list
 	if((strncmp(command_part(cmd,1),"base",strlen(command_part(cmd,1)))==0) && (strncmp(command_part(cmd,2), "list", strlen(command_part(cmd,2)))==0) && (dll_count(cmd)==2)){
 	  printf("List bases\n");
@@ -56,7 +56,7 @@ void * worker(void * sck){
 	  printf("Base display\n");
 	  base_display(s, atoi(command_part(cmd, 3)));
 	}
-
+	
 	//node new
 	if((strncmp(command_part(cmd,1),"node",strlen(command_part(cmd,1)))==0) && (strncmp(command_part(cmd,2), "new", strlen(command_part(cmd,2)))==0) && (dll_count(cmd)==5)){
 	  struct base * b=NULL;
@@ -100,7 +100,7 @@ void * worker(void * sck){
 	  if(b==NULL){
 	    write(s,"This base does not exist\n", strlen("This base does not exist\n"));
 	  }else if (n==NULL){
-	    	    write(s,"This node does not exist\n", strlen("This node does not exist\n"));
+	    write(s,"This node does not exist\n", strlen("This node does not exist\n"));
 	  }else{
 	    a=attribute_new(command_part(cmd,6), command_part(cmd, 7));
 	    n->attributes=dll_add(n->attributes, a);
@@ -156,9 +156,40 @@ void * worker(void * sck){
 	  }
 	}
       }
+      
+      //attribute delete base 
+      if(
+	 (strncmp(command_part(cmd,1),"attribute",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "delete", strlen(command_part(cmd,2)))==0) && \
+	 (strncmp(command_part(cmd,3), "base", strlen(command_part(cmd,3)))==0) && \
+	 (dll_count(cmd)==5)
+	 ){
+	struct base * b=NULL;
+	struct attribute * a=NULL;
+	long int i;
+	
+	printf("Delete an attribute of a base\n");
+	i=atoi(command_part(cmd, 4));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+	  i=atoi(command_part(cmd, 5));
+	  a=attribute_search_by_id(b->attributes, i);
+	  if (a!=NULL){
+	    a->dirty=1;
+	    a->deleted=1;
+	  } else {
+	    write(s, "That attribute does not exist\n", strlen("That attribute does not exist\n"));
+	  }
+	} else {
+	  write(s, "That base does not exist\n", strlen("That base does not exist\n"));
+	}
+      }
+   
+    
       command_free(cmd);
     }
   }
+  
   free(inp);
   
   close(s);
