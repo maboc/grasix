@@ -75,7 +75,10 @@ int write_base_attribute(struct base * b, struct attribute * a){
 
   if(a->dirty==1){
     if(a->deleted==1){
-      printf("deleted....not handled yet\n");
+      write_block_map(a->file_pos,"\0"); //write away a zero in the file
+
+      //handling of the actual deletion is not yet dealed with...however a->deleted=1  ....so this attribute will not show upp in results
+      
     } else {
       if((a->file_id==-1 )||(a->file_pos==-1)){
 	a->file_id=1;
