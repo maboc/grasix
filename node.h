@@ -9,6 +9,7 @@
 #include "dll.h"
 #include "base.h"
 #include "attribute.h"
+#include "relation.h"
 
 extern long int scn;
 

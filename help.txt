@@ -21,6 +21,12 @@ attribute delete node
 	       <node id>      : ID of the node the attribute to be deleted belongs
 	       <attribute id> : ID of the attribute to be deleted
 
+attribute delete base
+	  Purpose : Delete an attribute belonging to a base
+	  Syntax  : attribute delete base <base_id> <attribute_id>
+	  	  <base_id>      : The id of the base the attribute (to be deleted) belongs to
+		  <attribute_id> : id of the attribute to be deleted
+
 base display
 	purpose : fully show a base
 	Syntax  : base display <base_id>
@@ -44,3 +50,12 @@ node new
 	       <base_id> : The base to which the new nodes belongs
 	       <key>     : Key of the attribute, which will be added to the new node
 	       <value>   : Value of the attribute, which will be added to the new node
+
+relation add
+	 Purpose : Create a new relation for one node to another
+	 Syntax  : relation add <base_id> <target_node_id> <relates_to_node_id> <key> <value>
+	 	 <base_id>            : ID of the base on wich the target node lives
+	 	 <target_node_id>     : The node on which the relation starts
+		 <relates_to_node_id> : The node to wich he relation is directed
+		 <key>                : Key of the first attribute of this relation
+		 <value>              : value of the first attribute of this relation

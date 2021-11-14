@@ -184,8 +184,42 @@ void * worker(void * sck){
 	  write(s, "That base does not exist\n", strlen("That base does not exist\n"));
 	}
       }
-   
-    
+
+      //relation new
+      if(
+    	 (strncmp(command_part(cmd,1),"relation",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "add", strlen(command_part(cmd,2)))==0) && \
+	 (dll_count(cmd)==7)
+	 ){
+	struct base * b;
+	struct node * target;
+	struct node * relates_to;
+	struct attribute * a;
+	struct relation * r;
+	char * k;//key
+	char * v;//value
+	int i;
+		
+	printf("Create a relation\n");
+	i=atoi(command_part(cmd, 3));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+	  i=atoi(command_part(cmd, 4));
+	  target=node_search_by_id(b->nodes, i);
+	  if (target!=NULL){
+	    i=atoi(command_part(cmd, 5));
+	    relates_to=node_search_by_id(b->nodes, i);
+	    if (relates_to!=NULL){
+	      r=relation_new();
+	      r->relates_to=relates_to;
+	      a=attribute_new(command_part(cmd, 6),command_part(cmd, 7));
+	      r->attributes=dll_add(r->attributes, a);
+	      target->relations=dll_add(target->relations, r);
+	    }
+	  }
+	}	
+      }
+      
       command_free(cmd);
     }
   }

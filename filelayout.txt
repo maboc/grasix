@@ -2,10 +2,10 @@ Layout datafiles
 
 first 1024 (0-1023) bytes : bitmap for data
 0 - free position
-1 - indicates a base
-2 - indicates a node
-3 - indicates an base attribute
-4 - indicates an node attribute
+a - indicates a base
+b - indicates an base attribute
+c - indicates a node
+d - indicates an node attribute
 
 
 Bytes 1024 and further are blocks of 512 Bytes (mapped by the bitmap header)
