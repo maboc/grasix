@@ -21,4 +21,6 @@ int graph_loader_base(void *, int, int);
 int graph_loader_base_attribute(void *, int, int);
 int graph_loader_node(void *, int, int);
 int graph_loader_node_attribute(void *, int, int);
+int graph_loader_relation(void *, int, int);
+int graph_loader_relation_attribute(void *, int, int);
 #endif

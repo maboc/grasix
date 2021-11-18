@@ -45,13 +45,36 @@ int relations_display(int sck, struct dll * relations){
 
 int relation_display(int sck, struct relation * r){
   char * tmp;
+  struct node * relates_to;
 
-  tmp=malloc(strlen("Relation : ")+12); //very large values of ID
-  bzero(tmp,strlen("Relation : ")+12);
-  sprintf(tmp,"Relation : %ld\n",r->id);
+  relates_to=r->relates_to; //for some reason r->relates_to->id did not work....do a step in between
+  
+  tmp=malloc(strlen("Relation : relates to : \n")+24); //very large values of ID
+  bzero(tmp,strlen("Relation : relates to : \n")+24);
+  sprintf(tmp,"Relation : %ld : relates to : %ld\n",r->id, relates_to->id);
   write(sck, tmp, strlen(tmp));
-  free (tmp);
+  free(tmp);
+  
   attributes_display(sck, r->attributes);
 
   return 0;
+}
+
+struct relation * relation_search_by_id(struct dll * relations, long int id){
+
+  struct relation * r, *t;
+  
+  if (relations==NULL){
+    r=NULL;
+  } else{
+    relations=dll_first(relations);
+    while(relations->next!=NULL){
+      t=relations->payload;
+      if(t->id==id) r=relations->payload;
+      relations=relations->next;
+    }
+    t=relations->payload;
+    if(t->id==id) r=relations->payload;
+  }
+  return r;
 }

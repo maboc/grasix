@@ -15,5 +15,6 @@ extern long int scn;
 struct relation * relation_new();
 int relations_display(int, struct dll *);
 int relation_display(int, struct relation *);
+struct relation * relation_search_by_id(struct dll *, long int);
 
 #endif

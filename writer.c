@@ -21,6 +21,14 @@ void * graph_writer(void * input){
 int write_base(struct base * b){
   int free_pos=0;
 
+  //first write nodes and attributes....at a deletion the base may allready be gone while the nodes and the attributes are still there...never get cleaned
+  //Now write the attributes belonging to this base
+  b->attributes=write_base_attributes(b, b->attributes);
+  
+  //And write the nodes (the attributes of the nodes are handled recusrvely)
+  b->nodes=write_nodes(b, b->nodes);
+
+  
   if(b->dirty==1){
     if(b->deleted==0){
       if((b->file_id==-1 )||(b->file_pos==-1)){
@@ -47,11 +55,6 @@ int write_base(struct base * b){
     }
     b->dirty=0;
   }
-  //Now write the attributes belonging to this base
-  b->attributes=write_base_attributes(b, b->attributes);
-  
-  //And write the nodes (the attributes of the nodes are handled recusrvely)
-  b->nodes=write_nodes(b, b->nodes);
   
   return 0;
 }
@@ -128,6 +131,10 @@ struct dll * write_nodes(struct base * b, struct dll * nodes){
 
 int write_node(struct base * b, struct node * n){
   int free_pos;
+
+  //attributes and relations of the node should be written first (other wise the node may allready be gone)
+  n->attributes=write_node_attributes(b, n, n->attributes);
+  n->relations=write_relations(b,n, n->relations);
   
   if(n->dirty==1){
     if(n->deleted==1){
@@ -161,7 +168,7 @@ int write_node(struct base * b, struct node * n){
     n->dirty=0;
   }
 
-  n->attributes=write_node_attributes(b, n, n->attributes);
+
   
   return 0;
 }
@@ -201,7 +208,7 @@ struct dll * write_node_attribute(struct base * b, struct node * n, struct attri
 	//get the first free position in the block_map
 	free_pos=free_pos_search(a->file_id);
 	a->file_pos=free_pos;
-      }	
+      }
       //write the block_map
       write_block_map(a->file_pos, "d");//d signifying an attribute of a node 
       
@@ -227,6 +234,138 @@ struct dll * write_node_attribute(struct base * b, struct node * n, struct attri
   }
   
   return n->attributes;
+}
+
+struct dll * write_relations(struct base * b, struct node * n, struct dll * relations){
+  int ret;
+  
+  if(relations!=NULL){
+    relations=dll_first(relations);
+    
+    while(relations->next!=NULL){
+      ret=write_relation(b,n,relations->payload);
+      relations=relations->next;
+    }
+    ret=write_relation(b,n,relations->payload);
+  }
+  
+  return relations;
+}
+
+int  write_relation(struct base * b, struct node * n,  struct relation * r){
+  int free_pos;
+  struct node * relates_to;
+
+  relates_to=r->relates_to;
+  
+  r->attributes=write_relation_attributes(b,n,r,r->attributes);//first write away the attributes
+  
+  if(r->dirty==1){
+    if(r->deleted==1){
+      //block_map aanpassen en wegschrijven
+      write_block_map(r->file_pos, "\0");// signifying there is nothing there (lazy ...no block cleanup) 
+      
+      //actually delete the attribute
+      //n->attributes=attribute_delete(n->attributes, a);
+      
+    } else {
+      if((r->file_id==-1 )||(r->file_pos==-1)){
+	r->file_id=1;
+	printf("graph_writer : write_relation : File is harcoded to 1\n");
+	
+	//get the first free position in the block_map
+	free_pos=free_pos_search(r->file_id);
+	r->file_pos=free_pos;
+      }	
+      //write the block_map
+      write_block_map(r->file_pos, "e");//e signifying an relation
+      
+      //write the content	
+      void * block=NULL; //Do not understand why I have to declare the block here????
+      void * tmp=NULL;
+      block=malloc(512); //standard block size
+      tmp=block;
+      block=memset(block, 0, 512);//clean the block...only NULLs
+      block=memcpy(block, & r->id, sizeof(long int));//copy the ID of the relation;
+      block=block+sizeof(long int); //advance to the next free position in th block
+      block=memcpy(block, & b->id, sizeof(long int));//copy the ID of the base
+      block=block+sizeof(long int); //advance to the next free position in th block
+      block=memcpy(block, & n->id, sizeof(long int));//copy the id of the node in the block
+      block=block+sizeof(long int);//advance the pointer 
+      block=memcpy(block, & relates_to->id, sizeof(long int));//copy the id of the node this relation is relating to in the block
+      
+      write_block(r->file_pos, tmp);//block is een verschoven positie :-) schrijf tmp weg!
+      free(tmp);
+    }
+    r->dirty=0;       
+  }
+  
+  return 0;
+}
+
+struct dll * write_relation_attributes(struct base * b, struct node * n, struct relation * r, struct dll * attributes){
+  int ret;
+  
+  if(attributes!=NULL){
+    attributes=dll_first(attributes);
+    
+    while(attributes->next!=NULL){
+      ret=write_relation_attribute(b, n, r, attributes->payload);
+      attributes=attributes->next;
+    }
+    ret=write_relation_attribute(b, n, r, attributes->payload);
+  }
+  
+  return attributes;
+}
+
+int write_relation_attribute(struct base * b, struct node * n, struct relation * r, struct attribute * a){
+  int free_pos;
+  
+  if(a->dirty==1){
+    if(a->deleted==1){
+      //block_map aanpassen en wegschrijven
+      write_block_map(a->file_pos, "\0");// signifying there is nothing there (lazy ...no block cleanup) 
+      
+      //actually delete the attribute
+      //n->attributes=attribute_delete(n->attributes, a);
+      
+    } else {
+      if((a->file_id==-1 )||(a->file_pos==-1)){
+	a->file_id=1;
+	printf("graph_writer : write_node_attribtue : File is harcoded to 1\n");
+	
+	//get the first free position in the block_map
+	free_pos=free_pos_search(a->file_id);
+	a->file_pos=free_pos;
+      }	
+      //write the block_map
+      write_block_map(a->file_pos, "f");//d signifying an attribute of a relation 
+      
+      //write the content	
+      void * block=NULL; //Do not understand why I have to declare the block here????
+      void * tmp=NULL;
+      block=malloc(512); //standard block size
+      tmp=block;
+      block=memset(block, 0, 512);
+      block=memcpy(block, & a->id, sizeof(long int));//copy the ID of the attribute;
+      block=block+sizeof(long int); //advance to the next free position in th block
+      block=memcpy(block, & b->id, sizeof(long int));//copy the ID of the base
+      block=block+sizeof(long int); //advance to the next free position in th block
+      block=memcpy(block, & n->id, sizeof(long int));//copy the id of the node in the block
+      block=block+sizeof(long int);//advance the pointer
+      block=memcpy(block, &r->id, sizeof(long int));//copy the ID of the relation
+      block=block+sizeof(long int);//advance the pointer
+      block=strncpy(block, a->key, strlen(a->key)+1); //copy the key of the attribute to the block
+      block=block+strlen(a->key)+1;//advance to the next free position (+1 for the terminating zero)
+      block=strncpy(block, a->value, strlen(a->value)+1); //copy the key of the attribute to the block
+      write_block(a->file_pos, tmp);//block is een verschoven positie :-) schrijf tmp weg!
+      free(tmp);
+    }
+    a->dirty=0;       
+  }
+  
+  return 0;
 }
 
 int free_pos_search(int file_id){
@@ -309,3 +448,4 @@ int write_block(int block_pos, void * block){
 
   return 0;  
 }
+
