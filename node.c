@@ -26,6 +26,8 @@ int node_display(int sck, struct node * n){
   write(sck, tmp, strlen(tmp));
   free (tmp);
   attributes_display(sck, n->attributes);
+  relations_display(sck, n->relations);
+  
   return 0;
   
 }

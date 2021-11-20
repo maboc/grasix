@@ -15,7 +15,9 @@ int graph_loader(){
   loader("b");
   loader("c");
   loader("d");
-
+  loader("e");
+  loader("f");
+  
   return 0;
 }
 
@@ -44,12 +46,12 @@ int loader(char * t){
       block_code=malloc(2);
       block_code=memset(block_code,0,2);
       block_code=strncpy(block_code, block_map+block_map_pos, 1); //read the code from block_map position pos
-
+      
       block=malloc(512);//Hardcodes sheit
       block=memset(block, 0, 512);
       fseek(fp, 1024+block_map_pos*512, SEEK_SET);
       fread(block, 512, 1, fp);
-
+      
       //the actual loading will now take place
       if(strncmp(t, block_code, 1)==0){
 	if(strncmp(block_code, "a", 1)==0){
@@ -58,8 +60,12 @@ int loader(char * t){
 	  graph_loader_base_attribute(block, 1, block_map_pos);
 	} else if(strncmp(block_code, "c", 1)==0){
 	  graph_loader_node(block, 1, block_map_pos);
-	}     else if(strncmp(block_code, "d", 1)==0){
+	} else if(strncmp(block_code, "d", 1)==0){
 	  graph_loader_node_attribute(block, 1, block_map_pos);
+	} else if(strncmp(block_code, "e", 1)==0){
+	  graph_loader_relation(block, 1, block_map_pos);
+	} else if(strncmp(block_code, "f", 1)==0){
+	  graph_loader_relation_attribute(block, 1, block_map_pos);
 	}
       }
       free(block);
@@ -156,8 +162,7 @@ int graph_loader_node(void * block, int file_id, int file_pos){
   //ah....a node
   struct base * b=NULL;
   struct node * n=NULL;
-  long int tmp, base_id, node_id;
-	
+  long int tmp, base_id, node_id;	
 
   //let start by reading the ID of this node
   memcpy(&tmp, block, sizeof(long int));
@@ -222,6 +227,104 @@ int graph_loader_node_attribute(void * block, int file_id, int file_pos){
   n=node_search_by_id(b->nodes, node_id);
 
   n->attributes=dll_add(n->attributes, a);
+	
+  return 0;
+}
+
+int graph_loader_relation(void * block, int file_id, int file_pos){
+  //ah....a relation
+  struct base * b;
+  struct node * n;
+  struct relation * r=NULL;
+  struct node * rt=NULL;
+  long int tmp, base_id, node_id, relation_id, relates_to_id;
+  int l;
+		
+  //let start by reading the ID of this relation
+  memcpy(&tmp, block, sizeof(long int));
+  relation_id=tmp;
+	
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  base_id=tmp;
+
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  node_id=tmp;
+
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  relates_to_id=tmp;
+
+  //get the base and node so we can add this relation
+  b=base_search_by_id(base_id);
+  n=node_search_by_id(b->nodes, node_id);
+  rt=node_search_by_id(b->nodes, relates_to_id);
+  
+  //create the relation
+  r=relation_new();
+  //set some values of this relation
+  r->id=relation_id;
+  r->relates_to=rt;
+  r->dirty=0;
+  r->deleted=0;
+  r->file_id=file_id;
+  r->file_pos=file_pos;
+
+  //add the relation to the node
+  n->relations=dll_add(n->relations, r);
+  
+  return 0;
+}
+
+int graph_loader_relation_attribute(void * block, int file_id, int file_pos){
+  //ah....an attribute belonging to a relation
+  struct base * b;
+  struct node * n;
+  struct relation * r;
+  struct attribute * a=NULL;
+  long int tmp, base_id, node_id, relation_id, attribute_id;
+  int l;
+  char * key, * value;
+		
+  //let start by reading the ID of this attribute
+  memcpy(&tmp, block, sizeof(long int));
+  attribute_id=tmp;
+	
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  base_id=tmp;
+
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  node_id=tmp;
+
+  block=block+sizeof(long int);//advance the pointer
+  memcpy(&tmp, block, sizeof(long int));
+  relation_id=tmp;
+
+  block=block+sizeof(long int);//advance the pointer. W're now at the positon for the key of the attribute
+  l=strlen(block);
+  key=malloc(l);
+  key=strncpy(key, block, strlen(block));
+  
+  block=block+strlen(block)+1;//advance the pointer. W're now at the position of the value of the attribute
+  l=strlen(block);
+  value=malloc(strlen(block));
+  value=strncpy(value, block, strlen(block));
+  
+  a=attribute_new(key, value);
+  a->id=attribute_id;
+  a->dirty=0;
+  a->deleted=0;
+  a->file_id=file_id;
+  a->file_pos=file_pos;
+	
+  b=base_search_by_id(base_id);//search the base 
+  n=node_search_by_id(b->nodes, node_id); //search whitin the base for the node
+  r=relation_search_by_id(n->relations, relation_id); //search whitin the node for the relation
+  
+  r->attributes=dll_add(r->attributes, a);
 	
   return 0;
 }

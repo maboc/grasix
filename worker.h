@@ -10,6 +10,7 @@
 #include "base.h"
 #include "attribute.h"
 #include "node.h"
+#include "relation.h"
 
 extern struct dll * bases;
 extern int doorgaan;

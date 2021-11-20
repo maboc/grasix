@@ -38,4 +38,14 @@ struct attribute {
   int file_pos;
 };
 
+struct relation {
+  long int id; //if of the relation
+  struct node * relates_to;
+  struct dll * attributes;
+  int dirty; //0: clean 1:dirty
+  int deleted; //0: it's there 1: delted
+  int file_id;
+  int file_pos;
+};
+
 #endif

@@ -1,7 +1,7 @@
 all : clean grasix
 
-grasix : grasix.o network.o worker.o dll.o loader.o command.o base.o attribute.o node.o writer.o
-	gcc grasix.o network.o worker.o dll.o loader.o command.o base.o attribute.o node.o writer.o -pthread -ggdb -o grasix
+grasix : grasix.o network.o worker.o dll.o loader.o command.o base.o attribute.o node.o writer.o relation.o
+	gcc grasix.o network.o worker.o dll.o loader.o command.o base.o attribute.o node.o writer.o relation.o -pthread -ggdb -o grasix
 
 grasix.o : grasix.c grasix.h
 	gcc -c -ggdb grasix.c
@@ -32,6 +32,9 @@ node.o : node.c node.h
 
 writer.o : writer.c writer.h
 	gcc -c -ggdb writer.c -o writer.o
+
+relation.o : relation.c relation.h
+	gcc -c -ggdb relation.c -o relation.o
 
 clean :
 	rm *.o
