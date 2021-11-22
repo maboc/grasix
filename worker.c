@@ -199,7 +199,7 @@ void * worker(void * sck){
 	char * k;//key
 	char * v;//value
 	int i;
-		
+	
 	printf("Create a relation\n");
 	i=atoi(command_part(cmd, 3));
 	b=base_search_by_id(i);
@@ -219,7 +219,92 @@ void * worker(void * sck){
 	  }
 	}	
       }
+
+      //delete attribute relation
+      if(
+	 (strncmp(command_part(cmd,1),"attribute",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "delete", strlen(command_part(cmd,2)))==0) && \
+	 (strncmp(command_part(cmd,3), "relation", strlen(command_part(cmd,3)))==0) && \
+	 (dll_count(cmd)==7)
+	 ){
+	struct base * b=NULL;
+	struct node * n=NULL;
+	struct attribute * a=NULL;
+	struct relation * r=NULL;
+	long int i;
+	
+	printf("Delete an attribute of a relation\n");
+	i=atoi(command_part(cmd, 4));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+	  i=atoi(command_part(cmd, 5));
+	  n=node_search_by_id(b->nodes, i);
+	  if(n!=NULL){
+	    i=atoi(command_part(cmd, 6));
+	    r=relation_search_by_id(n->relations, i);
+	    if(r!=NULL){
+	      i=atoi(command_part(cmd, 7));
+	      a=attribute_search_by_id(r->attributes, i);
+	      if (a!=NULL){
+		a->dirty=1;
+		a->deleted=1;
+	      } else {
+		write(s, "That attribute does not exist\n", strlen("That attribute does not exist\n"));
+	      }
+	    } else {
+	      write(s, "That relation does not exist\n", strlen("That relation does not exist\n"));
+	    }
+	  } else {
+	    write(s, "That node does not exist\n", strlen("That node does not exist\n"));
+	  }
+	} else {
+	  write(s, "That base does not exist\n", strlen("That base does not exist\n"));
+	}
+      }
       
+      //attribute add relation
+      if(
+	 (strncmp(command_part(cmd,1),"attribute",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "add", strlen(command_part(cmd,2)))==0) && \
+	 (strncmp(command_part(cmd,3), "relation", strlen(command_part(cmd,3)))==0) && \
+	 (dll_count(cmd)==8)){
+
+	printf("Add an attribute to a relation\n");
+	struct base * b=NULL;
+	struct node * n=NULL;
+	struct relation * r=NULL;
+	struct attribute * a=NULL;
+	int i;
+
+	//search the base
+	i=atoi(command_part(cmd,4));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+
+	  //if the base exists : search the node
+	  i=atoi(command_part(cmd,5));
+	  n=node_search_by_id(b->nodes, i);
+	  if (n!=NULL){
+
+	    //id the node exists search the relation
+	    i=atoi(command_part(cmd,6));
+	    r=relation_search_by_id(n->relations, i);
+	    if(r!=NULL){
+
+	      //if the relation exists finally add the attribute
+	      a=attribute_new(command_part(cmd,7), command_part(cmd, 8));
+	      r->attributes=dll_add(r->attributes, a);
+	      
+	    } else {
+	      write(s,"This relation does not exist\n", strlen("This relation does not exist\n"));
+	    }
+	  } else {
+	    write(s,"This node does not exist\n", strlen("This node does not exist\n"));
+	  }
+	} else {
+	  write(s,"This base does not exist\n", strlen("This base does not exist\n"));
+	}
+      }
       command_free(cmd);
     }
   }
