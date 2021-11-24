@@ -52,6 +52,12 @@ base new
 	 	 <key>    : the key of the first attribute of the new base
 		 <values> : the value of the first attribute of the new base 
 
+display node
+	Purpose : Quickly display a base
+	Syntax  : display node <base_id> <node_id>
+		<base_id> : ID of the base on which the node is created
+		<node_id> : ID of the node to be displayed
+
 node new
 	Purpose : Create a new node whitin base <base_id>, and add an attribute to the node.
 	Syntax : node new <base id> <key> <value>
@@ -67,3 +73,10 @@ relation add
 		 <relates_to_node_id> : The node to wich he relation is directed
 		 <key>                : Key of the first attribute of this relation
 		 <value>              : value of the first attribute of this relation
+
+relation delete
+	 Purpose : Delete a relation
+	 Syntax : relation delete <base_id> <node_id> <relation_id>
+	 	<base_id>     : ID of the base of the node on which the relation is created 
+	 	<node_id>     : The node on which the relation is created
+		<relation_id> : The ID of the relation

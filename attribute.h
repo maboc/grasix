@@ -19,4 +19,5 @@ int attributes_match(struct dll *, char *, char *);
 struct attribute * attribute_search_by_id(struct dll *, int);
 struct dll * attribute_delete(struct dll *, struct attribute *);
 int attribute_do_delete(struct dll *, struct attribute *);
+struct dll * attributes_delete_all(struct dll *);
 #endif

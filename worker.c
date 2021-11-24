@@ -305,6 +305,73 @@ void * worker(void * sck){
 	  write(s,"This base does not exist\n", strlen("This base does not exist\n"));
 	}
       }
+
+      //delete a relation
+      if(
+	 (strncmp(command_part(cmd,1),"relation",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "delete", strlen(command_part(cmd,2)))==0) && \
+	 (dll_count(cmd)==5)
+	 ){
+	struct base * b=NULL;
+	struct node * n=NULL;
+	struct relation * r=NULL;
+	long int i;
+	
+	printf("Delete a relation\n");
+	i=atoi(command_part(cmd, 3));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+	  i=atoi(command_part(cmd, 4));
+	  n=node_search_by_id(b->nodes, i);
+	  if(n!=NULL){
+	    i=atoi(command_part(cmd, 5));
+	    r=relation_search_by_id(n->relations, i);
+	    if(r!=NULL){
+	      
+	      //first delete the attributes of the relation
+              r->attributes=attributes_delete_all(r->attributes);
+	      
+	      //then delete the relation itself
+	      r->dirty=1;
+	      r->deleted=1;
+	      
+	    } else {
+	      write(s, "That relation does not exist\n", strlen("That relation does not exist\n"));
+	    }
+	  } else {
+	    write(s, "That node does not exist\n", strlen("That node does not exist\n"));
+	  }
+	} else {
+	  write(s, "That base does not exist\n", strlen("That base does not exist\n"));
+	}
+      }
+
+      //display a node (by id)
+      if(
+	 (strncmp(command_part(cmd,1),"display",strlen(command_part(cmd,1)))==0) && \
+	 (strncmp(command_part(cmd,2), "node", strlen(command_part(cmd,2)))==0) && \
+	 (dll_count(cmd)==4)
+	 ){
+	struct base * b=NULL;
+	struct node * n=NULL;
+	long int i;
+	
+	printf("Display a node by ID\n");
+	i=atoi(command_part(cmd, 3));
+	b=base_search_by_id(i);
+	if(b!=NULL){
+	  i=atoi(command_part(cmd, 4));
+	  n=node_search_by_id(b->nodes, i);
+	  if(n!=NULL){
+	    //if the node is found.....display it
+	    node_display(s, n);
+	  } else {
+	    write(s, "That node does not exist\n", strlen("That node does not exist\n"));
+	  }
+	} else {
+	  write(s, "That base does not exist\n", strlen("That base does not exist\n"));
+	}
+      }
       command_free(cmd);
     }
   }

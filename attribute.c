@@ -153,3 +153,26 @@ int attribute_do_delete(struct dll * attributes, struct attribute * a){
 
   return 0;
 }
+
+struct dll * attributes_delete_all(struct dll * attributes){
+  struct dll * tmp;
+  struct attribute * a;
+  
+  tmp=attributes;
+  if(attributes!=NULL){
+    attributes=dll_first(attributes);
+
+    while(attributes->next!=NULL){
+      a=attributes->payload;
+      a->dirty=1;
+      a->deleted=1;
+
+      attributes=attributes->next;
+    }
+    a=attributes->payload;
+    a->dirty=1;
+    a->deleted=1;
+  }
+  
+  return tmp;
+}
