@@ -12,6 +12,7 @@ struct node {
   long int id;
   struct dll * attributes;
   struct dll * relations;
+  struct dll * referrers;
   int dirty;  //0: clean 1:dirty
   int deleted; //0: it's there 1: deleted
   int file_id;

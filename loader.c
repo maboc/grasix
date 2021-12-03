@@ -273,6 +273,9 @@ int graph_loader_relation(void * block, int file_id, int file_pos){
 
   //add the relation to the node
   n->relations=dll_add(n->relations, r);
+
+  //but also add the node as a refferer to the related node
+  rt->referrers=dll_add(rt->referrers, n);
   
   return 0;
 }

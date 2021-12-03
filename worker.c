@@ -215,6 +215,9 @@ void * worker(void * sck){
 	      a=attribute_new(command_part(cmd, 6),command_part(cmd, 7));
 	      r->attributes=dll_add(r->attributes, a);
 	      target->relations=dll_add(target->relations, r);
+
+	      // On the other end (the relates_to end) We need to add the target as a referrer
+	      relates_to->referrers=dll_add(relates_to->referrers, target);
 	    }
 	  }
 	}	
@@ -315,6 +318,7 @@ void * worker(void * sck){
 	struct base * b=NULL;
 	struct node * n=NULL;
 	struct relation * r=NULL;
+	struct node * rt;//this node is related to
 	long int i;
 	
 	printf("Delete a relation\n");
@@ -334,6 +338,9 @@ void * worker(void * sck){
 	      //then delete the relation itself
 	      r->dirty=1;
 	      r->deleted=1;
+
+	      //on the other side the referrer must be deleted
+	      rt=r->relates_to;
 	      
 	    } else {
 	      write(s, "That relation does not exist\n", strlen("That relation does not exist\n"));
